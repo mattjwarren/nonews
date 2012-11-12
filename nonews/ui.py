@@ -10,6 +10,12 @@ pygame.init()
     
 font=pygame.font.SysFont([],25)
 #Surface.blit(source, dest, area=None, special_flags = 0): return Rect
+
+#tunable constants
+TICKS_TO_STOP=19.0 #19
+MOUSE_DAMPING=10.0 #10
+LOW_ENERGY_FACTOR=4.0 #4
+
 class person_badge(object):
     
     def __init__(self,data,surface):
@@ -42,11 +48,11 @@ class person_badge(object):
         self.cx+=self.vx
         self.cy+=self.vy
         #degrade velocities
-        if int(self.vy*4)!=0:
+        if int(self.vy*LOW_ENERGY_FACTOR)!=0:
             self.vy-=self.yf
         else:
             self.vy=0
-        if int(self.vx*4)!=0:
+        if int(self.vx*LOW_ENERGY_FACTOR)!=0:
             self.vx-=self.xf
         else:
             self.vx=0
@@ -58,9 +64,9 @@ class person_badge(object):
     
     def accelerate(self,delta):
         self.vx=delta[0]
-        self.xf=self.vx/19.0 #19 ticks to stop
+        self.xf=self.vx/TICKS_TO_STOP
         self.vy=delta[1]
-        self.yf=self.vy/19.0
+        self.yf=self.vy/TICKS_TO_STOP
         
 if __name__=='__main__':
 
@@ -84,8 +90,8 @@ if __name__=='__main__':
             elif event.type==MOUSEBUTTONUP:
                 mouse_up_x=event.pos[0]
                 mouse_up_y=event.pos[1]
-                delta_x=(mouse_up_x-mouse_down_x)/10.0
-                delta_y=(mouse_up_y-mouse_down_y)/10.0
+                delta_x=(mouse_up_x-mouse_down_x)/MOUSE_DAMPING
+                delta_y=(mouse_up_y-mouse_down_y)/MOUSE_DAMPING
                 pb.accelerate((delta_x,delta_y))
 
         #move all
