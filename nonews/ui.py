@@ -13,7 +13,7 @@ font=pygame.font.SysFont([],25)
 
 #tunable constants
 TICKS_TO_STOP=19.0 #19
-MOUSE_DAMPING=10.0 #10
+MOUSE_DAMPING=1.0 #10
 LOW_ENERGY_FACTOR=4.0 #4
 
 class person_badge(object):
