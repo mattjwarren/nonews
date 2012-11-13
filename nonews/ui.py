@@ -10,18 +10,28 @@ pygame.init()
     
 font=pygame.font.SysFont([],25)
 #Surface.blit(source, dest, area=None, special_flags = 0): return Rect
-class person_badge(object):
-    
-    def __init__(self,data,surface):
-        self.data=data
-        self.cx=325
+
+
+class UIBadge(object):
+    def __ini__(self,surface):
+        self.cx=0
         self.vx=0
         self.vy=0
-        self.cy=325
-        self.radius=50
+        self.cy=0
         self.surface=surface
+        
+
+class PersonBadge(UIBadge):
+    
+    def __init__(self,data,surface):
+        UIBadge.__init__(self,surface)
+        self.data=data
+        
+        self.radius=50
         self.border_color=(255,255,255)
-        self.width=0
+        self.width=0 #/ solid fill
+        self.shape_style='circle'
+        
         self.rendered_text={}
         self.rendered_text['name']=font.render(self.data['name'], True, (255,0,0))
 
@@ -62,6 +72,12 @@ class person_badge(object):
         self.vy=delta[1]
         self.yf=self.vy/19.0
         
+    def set_story_parent(self,story_badge):
+        self.story_parent=story_badge
+        
+class StoryBadge(UIBadge):
+    pass
+
 if __name__=='__main__':
 
     window = pygame.display.set_mode((750, 750))
@@ -70,7 +86,7 @@ if __name__=='__main__':
     display_surface = pygame.display.get_surface()
 
 
-    pb=person_badge({'name':'Bob'},display_surface)
+    pb=PersonBadge({'name':'Bob'},display_surface)
     dirty_rect=pb.render()
 
     while 1:
