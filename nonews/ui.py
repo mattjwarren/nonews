@@ -13,7 +13,7 @@ font=pygame.font.SysFont([],25)
 
 #tunable constants
 TICKS_TO_STOP=19.0 #19
-MOUSE_DAMPING=1.0 #10
+MOUSE_DAMPING=10.0 #10
 LOW_ENERGY_FACTOR=4.0 #4
 
 class person_badge(object):
@@ -67,7 +67,33 @@ class person_badge(object):
         self.xf=self.vx/TICKS_TO_STOP
         self.vy=delta[1]
         self.yf=self.vy/TICKS_TO_STOP
+
+class View(object):
+    def __init__(self):
+        self.focus=None
+        self.surface=pygame.display.get_surface()
+        self.named_nodes={}
+    
+    def focus_node(self,node):
+        self.focus=node
+    
+    def add_node(self,node):
+        self.named_nodes[node.name]=node
+        node.badge.surface=self.surface
         
+    def remove_node(self,node):
+        del(self.named_nodes[node.name])
+        
+    def render(self):
+        for node in self.named_nodes.values():
+            node.badge.tick()
+
+class story_node(object):
+    def __init__(self,badge):
+        self.badge=badge
+        self.name=badge.data['name']
+            
+      
 if __name__=='__main__':
 
     window = pygame.display.set_mode((750, 750))
