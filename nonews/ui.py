@@ -168,10 +168,32 @@ class StoryBadge(UIBadge):
         self.vy=delta[1]
         self.yf=self.vy/TICKS_TO_STOP
 
-    def add_child(self,child):
-        self.children.append(child)
-        child.set_parent(self)
+class View(object):
+    def __init__(self):
+        self.focus=None
+        self.surface=pygame.display.get_surface()
+        self.named_nodes={}
+    
+    def focus_node(self,node):
+        self.focus=node
+    
+    def add_node(self,node):
+        self.named_nodes[node.name]=node
+        node.badge.surface=self.surface
+        
+    def remove_node(self,node):
+        del(self.named_nodes[node.name])
+        
+    def render(self):
+        for node in self.named_nodes.values():
+            node.badge.tick()
 
+class story_node(object):
+    def __init__(self,badge):
+        self.badge=badge
+        self.name=badge.data['name']
+            
+      
 if __name__=='__main__':
 
     window = pygame.display.set_mode((750, 750))
