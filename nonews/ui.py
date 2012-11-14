@@ -57,16 +57,12 @@ class UIBadge(object):
 
     def tick_physics(self):
         #if I have a parent, let them decide for me
-        print "I AM %s do I have a parent?" % str(self)
         if hasattr(self,"parent"):
             if self.parent:
-                print "Yes I do! my parent is %s" % str(self.parent)
                 #ask the parent where they would like me to be
                 self.cx,self.cy=self.parent.get_child_position(self)
                 return
-        print "Nope :(, lets do some physics"
         #apply velocity
-        print "\tcurrent position and vel_deltas are %f/%f %f/%f" % (self.cx,self.vx,self.cy,self.vy)
         self.cx+=self.vx
         self.cy+=self.vy
         #degrade velocities
@@ -103,9 +99,7 @@ class UIBadge(object):
         self.children=self.children[0:child_index]+self.children[child_index+1:]
         
     def remove_children(self):
-        print "removing children from %s" % str(self)
         for child in self.children:
-            print "\tremoving: %s" % str(child)
             child.parent=None
         self.children=[]
             
@@ -153,7 +147,7 @@ class EntityBadge(UIBadge):
         if self.is_focus:
             dirty_rect=pygame.draw.circle(self.surface, 0, (int(self.cx),int(self.cy)), self.radius, self.border_width)
         else:
-            dirty_rect=pygame.draw.circle(self.surface, 0, (int(self.cx/2.0),int(self.cy/2.0)), int(self.radius/2.0), self.border_width)
+            dirty_rect=pygame.draw.circle(self.surface, 0, (int(self.cx),int(self.cy)), int(self.radius/2.0), self.border_width)
         return [dirty_rect]
 
     def find_children(self):
@@ -178,7 +172,10 @@ class StoryBadge(UIBadge):
 
         
     def get_shape(self):
-        return Rect(self.cx-self.width_x/2.0,self.cy-self.width_y/2.0,self.width_x,self.width_y)
+        if self.is_focus:
+            return Rect(self.cx-self.width_x/2.0,self.cy-self.width_y/2.0,self.width_x,self.width_y)
+        else:
+            return Rect(self.cx-self.width_x/4.0,self.cy-(self.width_y/4.0),self.width_x/2.0,self.width_y/2.0)
     
     def render(self):
         #render all children
@@ -191,7 +188,7 @@ class StoryBadge(UIBadge):
         return dirty_child_rects+[background_rect,text_rect]
     
     def erase(self):
-        dirty_rect=pygame.draw.rect(self.surface, 0, Rect(self.cx-self.width_x/2.0,self.cy-self.width_y/2.0,self.width_x,self.width_y), self.border_width)
+        dirty_rect=pygame.draw.rect(self.surface, 0, self.get_shape(), self.border_width)
         return [dirty_rect]
 
     def find_children(self):
@@ -240,6 +237,7 @@ class View(object):
         for node in self.nodes_to_add_in_tick:
             self.named_nodes[node.data['name']]=node
         self.nodes_to_add_in_tick=[]
+        nodes=self.named_nodes.values()
         
         for node in nodes:
             node.tick_physics()
@@ -250,7 +248,7 @@ class View(object):
         pygame.display.update(dirty_rects)
         
         #timing
-        pygame.time.delay(1000/2)
+        pygame.time.delay(1000/50)
               
 if __name__=='__main__':
 
@@ -281,7 +279,7 @@ if __name__=='__main__':
                 mouse_up_y=event.pos[1]
                 delta_x=(mouse_up_x-mouse_down_x)/MOUSE_DAMPING
                 delta_y=(mouse_up_y-mouse_down_y)/MOUSE_DAMPING
-                S.impulse_move((delta_x,delta_y))
+                view.focus.impulse_move((delta_x,delta_y))
             elif event.type==MOUSEBUTTONDOWN and event.button==2:
                 print 'DOWN BUTTON 2'
                 view.focus_node(ebs[2])
