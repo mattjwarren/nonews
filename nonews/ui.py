@@ -33,21 +33,28 @@ class UIBadge(object):
         self.parent=None
         self.is_focus=False
         self.children=[]
-                
+        self.component_positions={}
+             
     def render(self):
         """Should draw itself to self.surface and return a list of dirty rectangles"""
         raise Exception("render not implemented")
     
     def erase(self):
         """Should erase itself from self.surface and return a list of dirty rectangles"""
-        raise Exception("render not implemented")
+        raise Exception("erase not implemented")
     
     def find_children(self):
         """Should return a list of badges representing this nodes children"""
+        raise Exception("find_children not implemented")
 
-    def get_shape(self):
-        pass
-    
+    def layout_components(self):
+        """set values in self.component_positions"""
+        raise Exception("layout_components not implemented")
+        
+    def get_child_position(self,child):
+        """Given a child, tell it where to draw itself"""
+        raise Exception("get_child_position not implemented")
+
     def tick(self):
         #erase
         erase_rects=self.erase()
@@ -63,10 +70,14 @@ class UIBadge(object):
             if self.parent:
                 #ask the parent where they would like me to be
                 self.cx,self.cy=self.parent.get_child_position(self)
+                #update internal positional references
+                self.layout_components()
                 return
+
         #apply velocity
         self.cx+=self.vx
         self.cy+=self.vy
+        
         #degrade velocities
         if int(self.vy*LOW_ENERGY_FACTOR)!=0:
             self.vy-=self.yf
@@ -76,6 +87,9 @@ class UIBadge(object):
             self.vx-=self.xf
         else:
             self.vx=0
+
+        #update internal positional references
+        self.layout_components()
     
     def impulse_move(self,delta):
         self.vx=delta[0]
@@ -104,20 +118,7 @@ class UIBadge(object):
         for child in self.children:
             child.parent=None
         self.children=[]
-            
-    def get_child_position(self,child):
-        if (not child) or (len(self.children)==0):
-            raise Exception("No child to find, or I have no children.")
-        else:
-            try:
-                child_position=self.children.index(child)
-            except IndexError:
-                raise Exception("Child is not amongst my children.")
-            #Stories arrange their children like a clock around them
-            x=self.cx+math.sin( ((2*math.pi)/len(self.children))*child_position )*180.0
-            y=self.cy+math.cos( ((2*math.pi)/len(self.children))*child_position )*190.0
-            return x,y
-            
+
 class EntityBadge(UIBadge):
     """data: name"""
     def __init__(self,data):
@@ -133,16 +134,24 @@ class EntityBadge(UIBadge):
         self.rendered_text['large_name']=font_big.render(self.data['name'], True, (255,0,0))
         self.rendered_text['small_name']=font_small.render(self.data['name'], True, (255,0,0))
         
+        self.component_positions={}
         
+    def layout_components(self):
+        if self.is_focus:
+            self.component_positions['shape_center']=(int(self.cx),int(self.cy))
+            self.component_positions['shape_radius']=int(self.radius)
+            self.component_positions['name']=(self.cx-self.radius/2.0,self.cy-self.radius/2.0)
+            self.component_positions['rendered_text_name']=self.rendered_text['large_name']
+        else:
+            self.component_positions['shape_center']=(int(self.cx),int(self.cy))
+            self.component_positions['shape_radius']=int(self.radius/2.0)
+            self.component_positions['name']=(self.cx-self.radius/3.0,self.cy-self.radius/3.0)
+            self.component_positions['rendered_text_name']=self.rendered_text['small_name']
+
     def render(self):
         """Should draw itself to self.surface and return a list of dirty rectangles"""
-        #if i am the focus draw myself  twice as big as normal
-        if self.is_focus:      
-            background_rect=pygame.draw.circle(self.surface, self.border_color, (int(self.cx),int(self.cy)), self.radius, self.border_width)
-            text_rect=self.surface.blit(self.rendered_text['large_name'], (self.cx-self.radius/2.0,self.cy-self.radius/2.0))
-        else:
-            background_rect=pygame.draw.circle(self.surface, self.border_color, (int(self.cx),int(self.cy)), int(self.radius/2.0), self.border_width)
-            text_rect=self.surface.blit(self.rendered_text['small_name'], (self.cx-self.radius/3.0,self.cy-self.radius/3.0))
+        background_rect=pygame.draw.circle(self.surface, self.border_color, self.component_positions['shape_center'], self.component_positions['shape_radius'], self.border_width)
+        text_rect=self.surface.blit(self.component_positions['rendered_text_name'], self.component_positions['name'])
 
         return [background_rect,text_rect]
     
@@ -157,6 +166,19 @@ class EntityBadge(UIBadge):
     def find_children(self):
         for child in ebs:
             child.set_parent(self)
+            
+    def get_child_position(self,child):
+        if (not child) or (len(self.children)==0):
+            raise Exception("No child to find, or I have no children.")
+        else:
+            try:
+                child_position=self.children.index(child)
+            except IndexError:
+                raise Exception("Child is not amongst my children.")
+            # arrange children like a clock
+            x=self.cx+math.sin( ((2*math.pi)/len(self.children))*child_position )*180.0
+            y=self.cy+math.cos( ((2*math.pi)/len(self.children))*child_position )*190.0
+            return x,y
         
 class StoryBadge(UIBadge):
     def __init__(self,data):
@@ -173,31 +195,41 @@ class StoryBadge(UIBadge):
         self.rendered_text={}
         self.rendered_text['headline']=font_big.render(self.data['headline'], True, (255,0,0))
 
-
+        self.component_positions={}
         
-    def get_shape(self):
+    def layout_components(self):
         if self.is_focus:
-            return Rect(self.cx-self.width_x/2.0,self.cy-self.width_y/2.0,self.width_x,self.width_y)
+            self.component_positions['headline']=(self.cx-self.width_x/2.0,self.cy-self.width_y/2.0)
+            self.component_positions['shape']=Rect(self.cx-self.width_x/2.0,self.cy-self.width_y/2.0,self.width_x,self.width_y)
         else:
-            return Rect(self.cx-self.width_x/4.0,self.cy-(self.width_y/4.0),self.width_x/2.0,self.width_y/2.0)
-    
-    def render(self):
-        #render all children
-        dirty_child_rects=[]
-        for child in self.children:
-            dirty_child_rects+=child.render()
-        
-        background_rect=pygame.draw.rect(self.surface, self.border_color, self.get_shape(), self.border_width)
-        text_rect=self.surface.blit(self.rendered_text['headline'], (self.cx-self.width_x/2.0,self.cy-self.width_y/2.0))
-        return dirty_child_rects+[background_rect,text_rect]
-    
+            self.component_positions['headline']=(self.cx-self.width_x/4.0,self.cy-self.width_y/4.0)
+            self.component_positions['shape']=Rect(self.cx-self.width_x/4.0,self.cy-(self.width_y/4.0),self.width_x/2.0,self.width_y/2.0)
+            
+    def render(self):        
+        background_rect=pygame.draw.rect(self.surface, self.border_color, self.component_positions['shape'], self.border_width)
+        text_rect=self.surface.blit(self.rendered_text['headline'], self.component_positions['headline'])
+        return [background_rect,text_rect]
+            
     def erase(self):
-        dirty_rect=pygame.draw.rect(self.surface, 0, self.get_shape(), self.border_width)
+        dirty_rect=pygame.draw.rect(self.surface, 0, self.component_positions['shape'], self.border_width)
         return [dirty_rect]
 
     def find_children(self):
         for child in ebs:
             child.set_parent(self)
+
+    def get_child_position(self,child):
+        if (not child) or (len(self.children)==0):
+            raise Exception("No child to find, or I have no children.")
+        else:
+            try:
+                child_position=self.children.index(child)
+            except IndexError:
+                raise Exception("Child is not amongst my children.")
+            # arrange children like a clock
+            x=self.cx+math.sin( ((2*math.pi)/len(self.children))*child_position )*180.0
+            y=self.cy+math.cos( ((2*math.pi)/len(self.children))*child_position )*190.0
+            return x,y
             
 class View(object):
     def __init__(self):
@@ -208,13 +240,19 @@ class View(object):
         self.focus_change=False
         self.named_nodes={}
         self.nodes_to_add_in_tick=[]
+        self.focus_erase_rect=[]
+        self.focus_pos=(0,0)
         
     def focus_node(self,node):
         if self.focus:
+            self.focus_erase_rect=self.focus.erase()
             self.focus.remove_children()
             self.focus.is_focus=False
-        self.focus=node    
+            self.focus_pos=(self.focus.cx,self.focus.cy)
+        self.focus=node
+        self.focus.cx,self.focus.cy=self.focus_pos
         self.focus.is_focus=True
+        self.focus_change=True
         
     def focus_do(self):
         self.focus.find_children()
@@ -235,7 +273,9 @@ class View(object):
             dirty_rects+=node.erase()
             
         #make focus change
-        self.focus_do()
+        if self.focus_change:
+            self.focus_do()
+            self.focus_change=False
         
         #bring in new nodes
         for node in self.nodes_to_add_in_tick:
@@ -246,20 +286,24 @@ class View(object):
         #physics the things
         for node in nodes:
             node.tick_physics()
+            
+        #render the stuff
         for node in nodes:
             dirty_rects+=node.render()
 
         #draw all
-        pygame.display.update(dirty_rects)
+        pygame.display.update(dirty_rects+self.focus_erase_rect)
+        self.focus_erase_rect=[]
         
         #timing
         pygame.time.delay(1000/50)
               
 if __name__=='__main__':
+    import random
 
     view=View()
 
-    S=StoryBadge({'name':'Story1','headline':'Some Story Headline'})
+    S=StoryBadge({'name':'Story1','headline':'Some Headline'})
     view.add_badge(S)
     view.focus_node(S)
     ebs.append(S)
@@ -268,12 +312,17 @@ if __name__=='__main__':
             if event.type in [QUIT]:
                 print 'QUIT'
                 sys.exit()
-            elif event.type==KEYDOWN:
-                print 'KEYDOWN'
+            elif event.type==KEYDOWN and event.unicode==u' ':
+                print 'KEYDOWN [space]'
                 new_eb=EntityBadge({'name':'bob%d' % len(ebs)})
                 ebs.append(new_eb)
                 S.add_child(new_eb)
                 view.add_badge(ebs[-1])
+            elif event.type==KEYDOWN and event.unicode==u'd':
+                print 'KEYDOWN [d]'
+                S.remove_child(ebs[-1])
+                view.remove_badge(ebs[-1])
+                del(ebs[-1])
             elif event.type==MOUSEBUTTONDOWN and event.button==1:
                 print 'DOWN BUTTON 1'
                 mouse_down_x=event.pos[0]
@@ -287,5 +336,5 @@ if __name__=='__main__':
                 view.focus.impulse_move((delta_x,delta_y))
             elif event.type==MOUSEBUTTONDOWN and event.button==2:
                 print 'DOWN BUTTON 2'
-                view.focus_node(ebs[2])
+                view.focus_node(random.choice(ebs))
         view.render()
