@@ -239,6 +239,7 @@ class View(object):
         self.nodes_to_add_in_tick=[]
         nodes=self.named_nodes.values()
         
+        #physics the things
         for node in nodes:
             node.tick_physics()
         for node in nodes:
