@@ -9,7 +9,9 @@ import math
 from pygame.locals import *
 pygame.init()
     
-font=pygame.font.SysFont([],25)
+font_big=pygame.font.SysFont([],20)
+font_small=pygame.font.SysFont([],12)
+
 #Surface.blit(source, dest, area=None, special_flags = 0): return Rect
 
 #tunable constants
@@ -128,17 +130,19 @@ class EntityBadge(UIBadge):
         self.shape_style='circle'
         
         self.rendered_text={}
-        self.rendered_text['name']=font.render(self.data['name'], True, (255,0,0))
+        self.rendered_text['large_name']=font_big.render(self.data['name'], True, (255,0,0))
+        self.rendered_text['small_name']=font_small.render(self.data['name'], True, (255,0,0))
+        
         
     def render(self):
         """Should draw itself to self.surface and return a list of dirty rectangles"""
         #if i am the focus draw myself  twice as big as normal
         if self.is_focus:      
             background_rect=pygame.draw.circle(self.surface, self.border_color, (int(self.cx),int(self.cy)), self.radius, self.border_width)
-            text_rect=self.surface.blit(self.rendered_text['name'], (self.cx-self.radius/2.0,self.cy-self.radius/2.0))
+            text_rect=self.surface.blit(self.rendered_text['large_name'], (self.cx-self.radius/2.0,self.cy-self.radius/2.0))
         else:
             background_rect=pygame.draw.circle(self.surface, self.border_color, (int(self.cx),int(self.cy)), int(self.radius/2.0), self.border_width)
-            text_rect=self.surface.blit(self.rendered_text['name'], (self.cx-self.radius/2.0,self.cy-self.radius/2.0))
+            text_rect=self.surface.blit(self.rendered_text['small_name'], (self.cx-self.radius/3.0,self.cy-self.radius/3.0))
 
         return [background_rect,text_rect]
     
@@ -167,7 +171,7 @@ class StoryBadge(UIBadge):
         self.shape_style='rectangle'
         
         self.rendered_text={}
-        self.rendered_text['headline']=font.render(self.data['headline'], True, (255,0,0))
+        self.rendered_text['headline']=font_big.render(self.data['headline'], True, (255,0,0))
 
 
         
@@ -197,7 +201,7 @@ class StoryBadge(UIBadge):
             
 class View(object):
     def __init__(self):
-        self.window = pygame.display.set_mode((1920, 1080))
+        self.window = pygame.display.set_mode((960, 540))
         pygame.display.set_caption('Nonews ui prototype')
         self.surface=pygame.display.get_surface()
         self.focus=None
@@ -259,7 +263,7 @@ if __name__=='__main__':
     view.add_badge(S)
     view.focus_node(S)
     ebs.append(S)
-    while 1:
+    while True:
         for event in pygame.event.get():
             if event.type in [QUIT]:
                 print 'QUIT'
