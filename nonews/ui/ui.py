@@ -233,6 +233,8 @@ class View(object):
         #tick
         dirty_rects=[]
         nodes=self.named_nodes.values()
+        
+        #Erase
         for node in nodes:
             dirty_rects+=node.erase()
             
@@ -248,6 +250,8 @@ class View(object):
         #physics the things
         for node in nodes:
             node.tick_physics()
+            
+        #render image data
         for node in nodes:
             dirty_rects+=node.render()
 
