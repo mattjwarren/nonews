@@ -17,7 +17,7 @@ font_small=pygame.font.SysFont([],12)
 #tunable constants
 TICKS_TO_STOP=19.0 #19
 MOUSE_DAMPING=10.0 #10
-LOW_ENERGY_FACTOR=4.0 #4
+LOW_ENERGY_FACTOR=2.0 #4
 
 ebs=[]
 
@@ -114,8 +114,10 @@ class UIBadge(object):
             except IndexError:
                 raise Exception("Child is not amongst my children.")
             #Stories arrange their children like a clock around them
-            x=self.cx+math.sin( ((2*math.pi)/len(self.children))*child_position )*180.0
-            y=self.cy+math.cos( ((2*math.pi)/len(self.children))*child_position )*190.0
+##            x=self.cx+math.sin( ((2*math.pi)/len(self.children))*child_position )*180.0
+##            y=self.cy+math.cos( ((2*math.pi)/len(self.children))*child_position )*190.0
+            x=self.cx+math.sin( ((2*math.pi)/36.0)*child_position )*180.0
+            y=self.cy+math.cos( ((2*math.pi)/36.0)*child_position )*190.0
             return x,y
             
 class EntityBadge(UIBadge):
