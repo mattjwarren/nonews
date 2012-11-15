@@ -105,11 +105,11 @@ class UIBadge(object):
             child.set_parent(self)
 
     def remove_child(self,child):
-        if child:
+        if child and (not child.is_focus) and (not child==self):
             try:
                 child_index=self.children.index(child)
             except:
-                raise Exception("Child to remove not found amongst my children.")
+                raise Exception("No Child to remove / Child to remove not found amongst my children / Child is myself.")
             child.parent=None
             self.children=self.children[0:child_index]+self.children[child_index+1:]
         

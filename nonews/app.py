@@ -10,18 +10,17 @@ import pygame
 from pygame.locals import *
 pygame.init()
 
-from ui.ui import View
+from ui.views.simple_view import View
 from ui.widgets.badges import StoryBadge, EntityBadge
 from ui.widgets.badges import MOUSE_DAMPING
 
 
 view=View()
-ebs=[]
 
 S=StoryBadge({'name':'Story1','headline':'Some Headline'})
-view.add_badge(S)
+view.add_node (S)
 view.focus_node(S)
-ebs.append(S)
+
 while True:
     for event in pygame.event.get():
         if event.type in [QUIT]:
@@ -29,15 +28,12 @@ while True:
             sys.exit()
         elif event.type==KEYDOWN and event.unicode==u' ':
             print 'KEYDOWN [space]'
-            new_eb=EntityBadge({'name':'bob%d' % len(ebs)})
-            ebs.append(new_eb)
-            S.add_child(new_eb)
-            view.add_badge(ebs[-1])
+            new_eb=EntityBadge({'name':'bob%d' % len(view.named_nodes.values())})
+            view.add_node(new_eb)
         elif event.type==KEYDOWN and event.unicode==u'd':
             print 'KEYDOWN [d]'
-            S.remove_child(ebs[-1])
-            view.remove_badge(ebs[-1])
-            del(ebs[-1])
+            if view.nodes:
+                view.remove_node(view.nodes[-1])
         elif event.type==MOUSEBUTTONDOWN and event.button==1:
             print 'DOWN BUTTON 1'
             mouse_down_x=event.pos[0]
@@ -51,5 +47,5 @@ while True:
             view.focus.impulse_move((delta_x,delta_y))
         elif event.type==MOUSEBUTTONDOWN and event.button==2:
             print 'DOWN BUTTON 2'
-            view.focus_node(random.choice(ebs))
+            view.focus_node(random.choice(view.nodes))
     view.render()
