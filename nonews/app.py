@@ -11,8 +11,8 @@ from pygame.locals import *
 pygame.init()
 
 from ui.ui import View
-from ui.ui_widgets.badges import StoryBadge, EntityBadge
-from ui.ui_widgets.badges import MOUSE_DAMPING
+from ui.widgets.badges import StoryBadge, EntityBadge
+from ui.widgets.badges import MOUSE_DAMPING
 
 
 view=View()
