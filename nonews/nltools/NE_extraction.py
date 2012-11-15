@@ -7,7 +7,7 @@ import nltk
 from nltk.book import *
 
 
-
+#text7 is the new york times articles
 tagged=nltk.pos_tag(text7)
 chunks=nltk.ne_chunk(tagged,binary=True)
 ne_chunks=[]
