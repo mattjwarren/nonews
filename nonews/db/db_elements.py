@@ -3,53 +3,69 @@ Created on 15 Nov 2012
 
 @author: GB108544
 '''
+from argtools.validation import process_kwargs
+#TODO: #from sqltools.emitters import sqlite_emitter
 
 class Field(object):
-    def __init__(self,**kwargs):        
-        try:
-            self.name=kwargs["name"]
-        except KeyError:
-            raise Exception("Required keyword parameter 'name' not found.")
-        
-        try:        
-            self.readable_name=kwargs["readable_name"]
-        except KeyError:
-            self.readable_name=None
-        
-        try:
-            self.default=kwargs["default"]
-        except KeyError:
-            self.default=None
-        
-        try:
-            self.not_null=kwargs["not_null"]
-        except KeyError:
-            self.not_null=False
+    def __init__(self,**kwargs):
+        process_kwargs(self,
+                      #required
+                            ["name",],                
+                      #with defaults
+                            {"readable_name"  :False,
+                             "default"        :False,
+                             "not_null"       :False,
+                             "primary_key"    :False,
+                             "unique"         :False,},
+                      #keywords
+                            kwargs)
 
     def create_sql(self):
+        #TODO: #change to use self.emitter (see from sqltools import in this module)
         pass
 
 class IntegerField(Field):
     def __init__(self,**kwargs):
-        Field.__init__(self,kwargs)
+        Field.__init__(self,**kwargs)
+        process_kwargs(self,
+                      #required
+                            ["size",],
+                      #with defaults
+                            {"auto_increment" :False},
+                      #keywords
+                            kwargs)
+        
         self.datatype=int
-        try:
-            self.auto_increment=kwargs["auto_increment"]
-        except KeyError:
-            self.auto_increment=False
-        try:
-            self.size=kwargs["size"]
-        except KeyError:
-            raise Exception("IntegerField requires 'size' parameter.")
-
+        
 class StringField(Field):
     def __init__(self,**kwargs):
-        Field.__init__(self,kwargs)
+        Field.__init__(self,**kwargs)
+        process_kwargs(self,
+                      #required
+                            ["size",],
+                      #with defaults
+                            False,
+                      #keywords
+                            kwargs)
+                
         self.datatype=str
-        try:
-            self.size=kwargs["size"]
-        except KeyError:
-            raise Exception("StringField requires 'size' parameter.")
+
+        def create_sql(self):
+            sql ="%s VARCHAR(%d)" % (self.name,self.size)
+            sql+=" DEFAULT %s" % self.default   if self.default     else ""
+            sql+=" NOT NULL"                    if self.not_null    else ""
+            sql+=" PRIMARY KEY"                 if self.primary_key else ""
+
+class RelatedField(Field):
+    def __init__(self,**kwargs):
+        Field.__init__(self,**kwargs)
+        process_kwargs(self,
+                      #required
+                            ["related_to",],
+                      #with defaults
+                            False,
+                      #keywords
+                            kwargs)
         
 class Table(object):
     def __init__(self,fields=None):
