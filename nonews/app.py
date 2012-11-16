@@ -7,12 +7,12 @@ import random
 import sys
 
 import pygame
-from pygame.locals import *
+from pygame.locals          import *
 pygame.init()
 
-from ui.views.simple_view import View
-from ui.widgets.badges import StoryBadge, EntityBadge
-from ui.widgets.badges import MOUSE_DAMPING
+from ui.views.simple_view   import View
+from ui.widgets.badges      import StoryBadge, EntityBadge
+from ui.widgets.badges      import MOUSE_DAMPING
 
 
 view=View()
