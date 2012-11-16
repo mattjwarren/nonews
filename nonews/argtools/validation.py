@@ -6,18 +6,18 @@ Created on 15 Nov 2012
 def raise_missing_args(required_args,received_args,raise_exception=True):
     '''if raise_exception is True then raise exception if missing args. Otherwise
     return a list of missing args, or an empty list if there are none.'''
-    if type(received_args) is dict:
-        received_args=received_args.keys()
+    if type(required_args) is dict:
+        required_args=required_args.keys()
     required_args=set(required_args if required_args else [])
-    received_args=set(received_args if received_args else [])
-    missing_args=received_args-required_args
+    received_args=set(received_args.keys() if received_args else [])
+    missing_args=required_args-received_args
     if missing_args and raise_exception:
         raise Exception("Missing keyword args: %s" % ','.join(missing_args))
     
 def set_args(instance,args,keyvalues):
     for arg in args if args else []:
         if type(args) is dict:
-            arg,default=args[arg]
+            default=args[arg]
         try:
             setattr(instance,arg,keyvalues[arg])
         except KeyError:
@@ -37,6 +37,5 @@ def process_kwargs(instance,required_args,args_with_defaults,keywords):
         #</required args>
 
         #<args with defaults>
-        raise_missing_args(args_with_defaults)
         set_args(instance,args_with_defaults,keywords)
-        #</args with defaults>        
+        #</args with defaults>

@@ -3,14 +3,21 @@ Created on 7 Nov 2012
 
 @author: AlienBaby
 '''
-
+from argtools.validation import process_kwargs
 import pygame
 pygame.init()
         
 class View(object):
-    def __init__(self):
-        self.window = pygame.display.set_mode((960, 540))
-        pygame.display.set_caption('Nonews ui prototype')
+    def __init__(self,**kwargs):
+        process_kwargs(self,
+                       #required
+                       ["display_mode","display_name"],
+                       #with defaults
+                       None,
+                       #keywords
+                       kwargs)
+        self.window = pygame.display.set_mode(self.display_mode)
+        pygame.display.set_caption(self.display_name)
         self.surface=pygame.display.get_surface()
         self.focus=None
         self._focus_change=False
@@ -93,7 +100,7 @@ class View(object):
     def _bring_in_new_nodes(self):
         for node in self._nodes_to_add_in_tick:
             if node not in self.nodes:
-                self.named_nodes[node.data['name']]=node
+                self.named_nodes[node.name]=node
                 self.nodes.append(node)
                 self.focus.add_child(node)
             else:
@@ -103,7 +110,7 @@ class View(object):
     def _take_out_nodes(self):
         for node in self._nodes_to_remove_in_tick:
             if node in self.nodes:
-                del(self.named_nodes[node.data['name']])
+                del(self.named_nodes[node.name])
                 node_index=self.nodes.index(node)
                 self.nodes=self.nodes[0:node_index]+self.nodes[node_index+1:]
                 self.focus.remove_child(node)

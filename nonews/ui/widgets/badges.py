@@ -7,7 +7,9 @@ import math
 
 import pygame
 pygame.init()
-    
+
+from argtools.validation import process_kwargs
+
 font_big=pygame.font.SysFont([],20)
 font_small=pygame.font.SysFont([],12)
 
@@ -17,18 +19,24 @@ MOUSE_DAMPING=10.0 #10
 LOW_ENERGY_FACTOR=2.0 #4
 
 class UIBadge(object):
-    def __init__(self):
-        self.cx=0 #anchor X
-        self.vx=0 #velocity X
-        self.xf=0 #friction X
-        self.vy=0 #   ~"~  as Y
-        self.cy=0 #   ~"~  as Y
-        self.yf=0 #   ~"~  as Y
-        self.surface=None
-        self.parent=None
-        self.is_focus=False
-        self.children=[]
-        self.component_positions={}
+    def __init__(self,**kwargs):
+        process_kwargs(self,
+                       #required
+                       None,
+                       #with defaults
+                       {"cy":0,
+                        "vy":0,
+                        "yf":0,
+                        "cx":0,
+                        "vx":0,
+                        "xf":0,
+                        "surface":None,
+                        "parent":None,
+                        "is_focus":False,
+                        "children":[],
+                        "component_positions":{},},
+                       #keywords
+                       kwargs)
              
     def render(self):
         """Should draw itself to self.surface and return a list of dirty rectangles"""
@@ -120,20 +128,22 @@ class UIBadge(object):
 
 class EntityBadge(UIBadge):
     """data: name"""
-    def __init__(self,data):
+    def __init__(self,**kwargs):
         UIBadge.__init__(self)
-        self.data=data
+        process_kwargs(self,
+                       #required
+                       ["data","name",],
+                       #with defaults
+                       {"radius":40,
+                        "border_color":(0,255,255),
+                        "border_width":0,
+                        "rendered_text":{},
+                        "component_positions":{},},
+                       #keywords
+                       kwargs)
         
-        self.radius=40
-        self.border_color=(0,255,255)
-        self.border_width=0 #/ solid fill
-        self.shape_style='circle'
-        
-        self.rendered_text={}
-        self.rendered_text['large_name']=font_big.render(self.data['name'], True, (255,0,0))
-        self.rendered_text['small_name']=font_small.render(self.data['name'], True, (255,0,0))
-        
-        self.component_positions={}
+        self.rendered_text['large_name']=font_big.render(self.name, True, (255,0,0))
+        self.rendered_text['small_name']=font_small.render(self.name, True, (255,0,0))
         
     def layout_components(self):
         if self.is_focus:
@@ -183,21 +193,23 @@ class EntityBadge(UIBadge):
             return x,y
         
 class StoryBadge(UIBadge):
-    def __init__(self,data):
+    def __init__(self,**kwargs):
         """data:  name,headline"""
-        UIBadge.__init__(self)
-        self.data=data
+        UIBadge.__init__(self,**kwargs)
+        process_kwargs(self,
+                       #required
+                       ["name","headline","data"],
+                       #with defaults,
+                       {"width_x":240,
+                        "width_y":300,
+                        "border_color":(255,255,255),
+                        "border_width":0,
+                        "rendered_text":{},
+                        "component_positions":{},},
+                       #keywords
+                       kwargs)
         
-        self.width_x=240
-        self.width_y=300
-        self.border_color=(255,255,255)
-        self.border_width=0 #/ solid fill
-        self.shape_style='rectangle'
-        
-        self.rendered_text={}
-        self.rendered_text['headline']=font_big.render(self.data['headline'], True, (255,0,0))
-
-        self.component_positions={}
+        self.rendered_text['headline']=font_big.render(self.headline, True, (255,0,0))
         
     def layout_components(self):
         if self.is_focus:

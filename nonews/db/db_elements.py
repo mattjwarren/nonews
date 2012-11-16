@@ -56,16 +56,22 @@ class StringField(Field):
             sql+=" NOT NULL"                    if self.not_null    else ""
             sql+=" PRIMARY KEY"                 if self.primary_key else ""
 
+class relation(object):
+    """data type class"""
+    pass
+
 class RelatedField(Field):
     def __init__(self,**kwargs):
         Field.__init__(self,**kwargs)
         process_kwargs(self,
                       #required
-                            ["related_to",],
+                            ["references",],
                       #with defaults
                             False,
                       #keywords
                             kwargs)
+        
+        self.datatype=relation
         
 class Table(object):
     def __init__(self,fields=None):

@@ -15,10 +15,10 @@ from ui.widgets.badges      import StoryBadge, EntityBadge
 from ui.widgets.badges      import MOUSE_DAMPING
 
 
-view=View()
+view=View(display_mode=(960,540),display_name="nonews UI Prototype")
 
-S=StoryBadge({'name':'Story1','headline':'Some Headline'})
-view.add_node (S)
+S=StoryBadge(name='Story1',headline='Some Headline',data={})
+view.add_node(S)
 view.focus_node(S)
 
 while True:
@@ -28,7 +28,8 @@ while True:
             sys.exit()
         elif event.type==KEYDOWN and event.unicode==u' ':
             print 'KEYDOWN [space]'
-            new_eb=EntityBadge({'name':'bob%d' % len(view.named_nodes.values())})
+            new_eb=EntityBadge(name='bob%d' % len(view.named_nodes.values()),
+                               data={})
             view.add_node(new_eb)
         elif event.type==KEYDOWN and event.unicode==u'd':
             print 'KEYDOWN [d]'
