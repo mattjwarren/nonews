@@ -132,7 +132,7 @@ class EntityBadge(UIBadge):
         UIBadge.__init__(self)
         process_kwargs(self,
                        #required
-                       ["data","name",],
+                       ["data","name","db"],
                        #with defaults
                        {"radius":40,
                         "border_color":(0,255,255),
@@ -198,7 +198,7 @@ class StoryBadge(UIBadge):
         UIBadge.__init__(self,**kwargs)
         process_kwargs(self,
                        #required
-                       ["name","headline","data"],
+                       ["name","headline","data","db"],
                        #with defaults,
                        {"width_x":240,
                         "width_y":300,
@@ -230,7 +230,11 @@ class StoryBadge(UIBadge):
 
     def find_children(self,list_of_children=None):
         if not list_of_children:
-            pass
+            related_entities=self.db.execute("""select * from Entities
+                                            inner join StoryEntities on Entities.id=StoryEntities.entity_id
+                                            where StoryEntities.story_id=%d
+                                            """
+                                            % self.data["story"].id)
         else:
             for child in list_of_children:
                 child.set_parent(self)

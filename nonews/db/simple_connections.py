@@ -21,9 +21,12 @@ class sqlite_connection(object):
         except sqlite3.Error, e:
             raise Exception( "Problem creating connection and getting cursor: %s" % e.args[0] )
         
-        def execute(self,sql):
+        def execute(self,sql,substitutions=None):
             try:
-                self.cursor.execute(sql)
+                if substitutions:
+                    self.cursor.execute(sql,substitutions)
+                else:
+                    self.cursor.execute(sql,substitutions)
             except sqlite3.Error, e:
                 raise Exception( "Problem executing SQL: %s" % e.args[0] )
             

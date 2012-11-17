@@ -6,6 +6,7 @@ Created on 15 Nov 2012
 import random
 import sys
 
+
 import pygame
 from pygame.locals          import *
 pygame.init()
@@ -13,6 +14,9 @@ pygame.init()
 from ui.views.simple_view   import View
 from ui.widgets.badges      import StoryBadge, EntityBadge
 from ui.widgets.badges      import MOUSE_DAMPING
+from db.simple_connections  import sqlite3_connection
+
+db=sqlite3_connection("test.db")
 
 
 view=View(display_mode=(960,540),display_name="nonews UI Prototype")

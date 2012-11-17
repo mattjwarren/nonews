@@ -12,8 +12,8 @@ class Field(object):
                       #required
                             ["name",],                
                       #with defaults
-                            {"readable_name"  :False,
-                             "default"        :False,
+                            {"readable_name"  :None,
+                             "default"        :None,
                              "not_null"       :False,
                              "primary_key"    :False,
                              "unique"         :False,},
@@ -31,11 +31,13 @@ class IntegerField(Field):
                       #required
                             ["size",],
                       #with defaults
-                            {"auto_increment" :False},
+                            {"auto_increment" :False,
+                            "value" :None,},
                       #keywords
                             kwargs)
-        
+        #absoloutes
         self.datatype=int
+        
         
 class StringField(Field):
     def __init__(self,**kwargs):
@@ -57,7 +59,7 @@ class StringField(Field):
             sql+=" PRIMARY KEY"                 if self.primary_key else ""
 
 class relation(object):
-    """data type class"""
+    """Represents a db element of type relation"""
     pass
 
 class RelatedField(Field):
@@ -72,6 +74,18 @@ class RelatedField(Field):
                             kwargs)
         
         self.datatype=relation
+
+class Record(object):
+    def __init__(self,**kwargs):
+        process_kwargs(self,
+                       #required
+                       ["fields",],
+                       #defaults
+                       None,
+                       #keywords
+                       kwargs)
+        
+        
         
 class Table(object):
     def __init__(self,fields=None):
@@ -79,6 +93,8 @@ class Table(object):
         
     def create_sql(self):
         pass
+
+
     
 class Schema(object):
     def __init__(self,tables):
