@@ -25,13 +25,13 @@ class View(object):
         self.nodes=[]
         self._nodes_to_add_in_tick=[]
         self._nodes_to_remove_in_tick=[]
-        self._focus_erase_rect=[]
+        self._focus_erase_rects=[]
         self.focus_pos=(0,0)
         
     def focus_node(self,node):
         if self.focus:
-            self._focus_erase_rect=self.focus.erase()
-            self.focus.remove_children()
+            self._focus_erase_rects+=self.focus.erase()
+            self._focus_erase_rects+=self.focus.kill_children()
             self.focus.is_focus=False
             self.focus_pos=(self.focus.cx,self.focus.cy)
         self.focus=node
@@ -80,15 +80,16 @@ class View(object):
             dirty_rects+=node.render()
 
         #draw all
-        pygame.display.update(dirty_rects+self._focus_erase_rect)
-        self._focus_erase_rect=[]
+        pygame.display.update(dirty_rects+self._focus_erase_rects)
+        self._focus_erase_rects=[]
         
         #timing
         pygame.time.delay(1000/50)
         
     def _focus_do(self):
         print 'doing _focus_do'
-        self.add_nodes(self.focus.find_children())
+        old_children,new_nodes=self.focus.find_children()
+        self.add_nodes(new_nodes)
             
     def _erase_nodes(self):
         dirty_rects=[]

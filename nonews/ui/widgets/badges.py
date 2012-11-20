@@ -121,16 +121,22 @@ class UIBadge(object):
             self.children=self.children[0:child_index]+self.children[child_index+1:]
         
     def remove_children(self):
+        dirty_rects=[]
         for child in self.children:
             child.parent=None
+            dirty_rects+=child.erase()
         del(self.children)
         self.children=[]
+        return dirty_rects
         
     def kill_children(self):
+        dirty_rects=[]
         for child in self.children:
+            dirty_rects+=child.erase()
             del(child)
         del(self.children)
         self.children=[]
+        return dirty_rects
         
 
 class EntityBadge(UIBadge):
@@ -182,7 +188,7 @@ class EntityBadge(UIBadge):
     def find_children(self,list_of_children=None):
         #get rid of current children, find new child info, create badges for them
         #getrelated records from DB, create children
-        self.kill_children() #kill my current children
+        dirty_rects=self.kill_children() #kill my current children
         related_stories=self.db.execute("""select distinct * from Articles
                                         inner join ArticlesEntities on articles.id=ArticlesEntities.article_id
                                         where ArticlesEntities.entity_id=%d
@@ -195,7 +201,7 @@ class EntityBadge(UIBadge):
                                    data=datadict,
                                    db=self.db)
             self.add_child(story_badge)
-        return self.children
+        return dirty_rects,self.children
             
     def get_child_position(self,child):
         if (not child) or (len(self.children)==0):
@@ -249,20 +255,19 @@ class StoryBadge(UIBadge):
     def find_children(self):
         #get rid of current children, find new child info, create badges for them
         #getrelated records from DB, create children
-        self.kill_children() #kill my current children
+        dirty_rects=self.kill_children() #kill my current children
         related_entities=self.db.execute("""select distinct * from Entities
                                         inner join ArticlesEntities on Entities.id=ArticlesEntities.entity_id
                                         where ArticlesEntities.article_id=%d
                                         """
                                         % self.data["id"])
-        print "related entities in SB find children="
         for related_entity in related_entities:
             datadict=dict(zip(("id","fullname"),related_entity))
             entity_badge=EntityBadge(name=datadict["fullname"],
                                      data=datadict,
                                      db=self.db)
             self.add_child(entity_badge)
-        return self.children
+        return dirty_rects,self.children
             
             
     def get_child_position(self,child):
