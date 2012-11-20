@@ -35,7 +35,9 @@ class Articles(Table):
                          default=None,
                          not_null=True,
                          unique=True)
-        
+
+        self.fields=[self.id,self.headline,self.body]
+                
         unique=(body,)
 
 class Entities(Table):

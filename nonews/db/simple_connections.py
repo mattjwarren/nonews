@@ -6,7 +6,7 @@ Created on 16 Nov 2012
 from argtools.validation import process_kwargs
 import sqlite3
 
-class sqlite_connection(object):
+class sqlite3_connection(object):
     def __init__(self,**kwargs):
         process_kwargs(self,
                        #required
