@@ -8,35 +8,44 @@ from db_elements import Schema,Table
 from db_elements import IntegerField, StringField, RelatedField
 
 
-
-
-class Articles(Table):
+class Article(Record):
     def __init__(self):
         self.id=IntegerField(name='id',
-                        readable_name='Content ID',
-                        size=11,
-                        auto_increment=True,
-                        default=None,
-                        not_null=True,
-                        primary_key=True,
-                        value="")
-    
+                            readable_name='Content ID',
+                            size=11,
+                            auto_increment=True,
+                            default=None,
+                            not_null=True,
+                            primary_key=True,
+                            value="")
+
         self.primary_key="id"
-        
+
         self.headline=StringField(name='headline',
-                             readable_name="Headline",
-                             size=255,
-                             default=None,
-                             not_null=True)
-        
+                                 readable_name="Headline",
+                                 size=255,
+                                 default=None,
+                                 not_null=True)
+    
         self.body=StringField(name="body",
-                         readable_name="Contents",
-                         size=8192,
-                         default=None,
-                         not_null=True,
-                         unique=True)
+                             readable_name="Contents",
+                             size=8192,
+                             default=None,
+                             not_null=True,
+                             unique=True)
+    
+        unique=(body,)    
         
-        unique=(body,)
+
+class Articles(Table):
+            
+    def __init__(self, record_class):
+        self.record_class=record_class
+        
+
+
+
+
 
 class Entities(Table):
     id=IntegerField(name='id',
