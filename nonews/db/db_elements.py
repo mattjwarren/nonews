@@ -76,23 +76,21 @@ class RelatedField(Field):
         self.datatype=relation
 
 class Record(object):
-    def __init__(self,**kwargs):
-        process_kwargs(self,
-                       #required
-                       ["fields",],
-                       #defaults
-                       None,
-                       #keywords
-                       kwargs)
+    def __init__(self):
+        pass
+    
+    def create_sql(self):
+        pass       
         
         
         
 class Table(object):
-    def __init__(self,fields=None):
-        self.fields=fields
+    def __init__(self,record_class):
+        self.record_class=record_class
         
     def create_sql(self):
         pass
+
 
 
     

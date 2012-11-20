@@ -9,7 +9,6 @@ import pygame
 pygame.init()
 
 from argtools.validation import process_kwargs
-
 font_big=pygame.font.SysFont([],20)
 font_small=pygame.font.SysFont([],12)
 
@@ -230,11 +229,11 @@ class StoryBadge(UIBadge):
 
     def find_children(self,list_of_children=None):
         if not list_of_children:
-            related_entities=self.db.execute("""select * from Entities
+            related_entities=rows_to_objects(self.db.execute("""select * from Entities
                                             inner join StoryEntities on Entities.id=StoryEntities.entity_id
                                             where StoryEntities.story_id=%d
                                             """
-                                            % self.data["story"].id)
+                                            % self.data["story"].id),Entities)
         else:
             for child in list_of_children:
                 child.set_parent(self)

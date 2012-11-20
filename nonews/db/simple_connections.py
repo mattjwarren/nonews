@@ -6,6 +6,8 @@ Created on 16 Nov 2012
 from argtools.validation import process_kwargs
 import sqlite3
 
+
+
 class sqlite_connection(object):
     def __init__(self,**kwargs):
         process_kwargs(self,
@@ -31,3 +33,6 @@ class sqlite_connection(object):
                 raise Exception( "Problem executing SQL: %s" % e.args[0] )
             
             return self.cursor.fetchall()
+        
+            
+            
