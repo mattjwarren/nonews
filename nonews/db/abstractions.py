@@ -3,20 +3,18 @@ Created on 16 Nov 2012
 
 @author: matt
 '''
-from db_elements import Record
 
-def rows_to_objects(data,klass=Table):
-    """data=[[row],[row],...]"""
-    headers,rows=data
-    
-    instances=[]
+def rows_to_records(rows,record_class):
+        
+    records=[]
     
     for row in rows:
-        klass_attrs=dict(zip(headers,row))
-        new_instance=klass(fields=klass.fields,**klass_attrs)
-        instances.append(new_instance)
-        
-    return instances
+        new_record=record_class()
+        [ setattr(new_record.field,"value",row[idx])
+            for idx,field in enumerate(new_record.fields)
+                if field.validate(row[idx]) ]
+        records.append(new_record)
+    return records
     
     
     

@@ -4,8 +4,8 @@ Created on 15 Nov 2012
 @author: GB108544
 '''
 
-from db_elements import Schema,Table
-from db_elements import IntegerField, StringField, RelatedField
+from db.components.elements import Schema,Table, Record
+from db.components.fields import IntegerField, StringField, RelatedField
 
 
 class Article(Record):
@@ -14,35 +14,39 @@ class Article(Record):
                             readable_name='Content ID',
                             size=11,
                             auto_increment=True,
-                            default=None,
+                            default=0,
                             not_null=True,
                             primary_key=True,
-                            value="")
+                            )
 
-        self.primary_key="id"
+        self.primary_key=(self.id,)
 
         self.headline=StringField(name='headline',
                                  readable_name="Headline",
                                  size=255,
-                                 default=None,
+                                 default="",
                                  not_null=True)
     
         self.body=StringField(name="body",
                              readable_name="Contents",
                              size=8192,
-                             default=None,
+                             default="",
                              not_null=True,
                              unique=True)
     
-        unique=(body,)    
-        
+        unique=(self.body,)
+
+        self.fields=[self.id,self.headline,self.body]    
+
+    def create_sql(self):
+        pass
 
 class Articles(Table):
             
     def __init__(self, record_class):
         self.record_class=record_class
 
-        self.fields=[self.id,self.headline,self.body]
+
                 
 
 

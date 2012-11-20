@@ -1,10 +1,11 @@
 '''
-Created on 15 Nov 2012
+Created on 20 Nov 2012
 
 @author: GB108544
 '''
 from argtools.validation import process_kwargs
 #TODO: #from sqltools.emitters import sqlite_emitter
+
 
 class Field(object):
     def __init__(self,**kwargs):
@@ -19,10 +20,18 @@ class Field(object):
                              "unique"         :False,},
                       #keywords
                             kwargs)
+        if self.default:
+            self.value=self.default
+        else:
+            self.value=None
 
     def create_sql(self):
         #TODO: #change to use self.emitter (see from sqltools import in this module)
         pass
+    
+    def validate(self,value):
+        """return true if value is valid type for this field"""
+        return type(value) is self.datatype
 
 class IntegerField(Field):
     def __init__(self,**kwargs):
@@ -31,8 +40,7 @@ class IntegerField(Field):
                       #required
                             ["size",],
                       #with defaults
-                            {"auto_increment" :False,
-                            "value" :None,},
+                            {"auto_increment" :False,},
                       #keywords
                             kwargs)
         #absoloutes
@@ -74,31 +82,11 @@ class RelatedField(Field):
                             kwargs)
         
         self.datatype=relation
-
-class Record(object):
-    def __init__(self,**kwargs):
-        process_kwargs(self,
-                       #required
-                       ["fields",],
-                       #defaults
-                       None,
-                       #keywords
-                       kwargs)
         
-        
-        
-class Table(object):
-    def __init__(self,fields=None):
-        self.fields=fields
-        
-    def create_sql(self):
-        pass
-
-
-    
-class Schema(object):
-    def __init__(self,tables):
-        self.tables=None
-    
-    def create_sql(self):
-        pass
+    def validate(self,value):
+        return type(value) is int #Need to figure this out!
+                    #check the value points
+                    #to a valid record of the type referenced
+                    #.. or is just an int? (for now..)
+                    
+                    
