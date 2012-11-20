@@ -14,15 +14,27 @@ pygame.init()
 from ui.views.simple_view   import View
 from ui.widgets.badges      import StoryBadge, EntityBadge
 from ui.widgets.badges      import MOUSE_DAMPING
-from db.simple_connections  import sqlite3_connection
+from db.simple_connections  import mysql_connection
 
-db=sqlite3_connection("test.db")
+db=mysql_connection(host="localhost",
+                    database_name="nonews_dev",
+                    user="root",
+                    password="thingstreory")
 
 
 view=View(display_mode=(960,540),display_name="nonews UI Prototype")
 
-S=StoryBadge(name='Story1',headline='Some Headline',data={})
+
+sdata=db.execute("select * from articles where articles.id=1")[0]
+datadict=dict( zip( ("id","source","headline","body"),sdata))
+S=StoryBadge(name=datadict["source"]+datadict["headline"],
+             headline=datadict["headline"],
+             data=datadict,
+             db=db)
+#S.find_children()
 view.add_node(S)
+#for child in S.children:
+#    view.add_node(child)
 view.focus_node(S)
 
 while True:
@@ -30,15 +42,6 @@ while True:
         if event.type in [QUIT]:
             print 'QUIT'
             sys.exit()
-        elif event.type==KEYDOWN and event.unicode==u' ':
-            print 'KEYDOWN [space]'
-            new_eb=EntityBadge(name='bob%d' % len(view.named_nodes.values()),
-                               data={})
-            view.add_node(new_eb)
-        elif event.type==KEYDOWN and event.unicode==u'd':
-            print 'KEYDOWN [d]'
-            if view.nodes:
-                view.remove_node(view.nodes[-1])
         elif event.type==MOUSEBUTTONDOWN and event.button==1:
             print 'DOWN BUTTON 1'
             mouse_down_x=event.pos[0]

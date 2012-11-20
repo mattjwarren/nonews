@@ -5,6 +5,7 @@ Created on 16 Nov 2012
 '''
 from argtools.validation import process_kwargs
 import sqlite3
+import MySQLdb
 
 class sqlite_connection(object):
     def __init__(self,**kwargs):
@@ -20,14 +21,34 @@ class sqlite_connection(object):
             self.cursor=self.connection.cursor()
         except sqlite3.Error, e:
             raise Exception( "Problem creating connection and getting cursor: %s" % e.args[0] )
+
         
-        def execute(self,sql,substitutions=None):
-            try:
-                if substitutions:
-                    self.cursor.execute(sql,substitutions)
-                else:
-                    self.cursor.execute(sql,substitutions)
-            except sqlite3.Error, e:
-                raise Exception( "Problem executing SQL: %s" % e.args[0] )
-            
-            return self.cursor.fetchall()
+    def execute(self,sql):
+        try:
+            self.cursor.execute(sql)
+        except sqlite3.Error, e:
+            raise Exception( "Problem executing SQL: %s" % e.args[0] )
+        return self.cursor.fetchall()
+
+class mysql_connection(object):
+    def __init__(self,**kwargs):
+        process_kwargs(self,
+                       #required
+                       ["database_name","host","user","password"],
+                       #with defaults
+                       None,
+                       #keywords
+                       kwargs)
+
+        self.connection=MySQLdb.connect(db=self.database_name,
+                                           host=self.host,
+                                           user=self.user,
+                                           passwd=self.password)
+        self.cursor=self.connection.cursor()
+
+    
+    def execute(self,sql):
+
+        self.cursor.execute(sql)
+
+        return self.cursor.fetchall()

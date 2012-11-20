@@ -46,7 +46,7 @@ class UIBadge(object):
         raise Exception("erase not implemented")
     
     def find_children(self):
-        """Should return a list of badges representing this nodes children"""
+        """Should cause this badge to find its children and parent itself to them"""
         raise Exception("find_children not implemented")
 
     def layout_components(self):
@@ -123,7 +123,15 @@ class UIBadge(object):
     def remove_children(self):
         for child in self.children:
             child.parent=None
+        del(self.children)
         self.children=[]
+        
+    def kill_children(self):
+        for child in self.children:
+            del(child)
+        del(self.children)
+        self.children=[]
+        
 
 class EntityBadge(UIBadge):
     """data: name"""
@@ -172,11 +180,22 @@ class EntityBadge(UIBadge):
         return [dirty_rect]
 
     def find_children(self,list_of_children=None):
-        if not list_of_children:
-            pass
-        else:
-            for child in list_of_children:
-                child.set_parent(self)
+        #get rid of current children, find new child info, create badges for them
+        #getrelated records from DB, create children
+        self.kill_children() #kill my current children
+        related_stories=self.db.execute("""select distinct * from Articles
+                                        inner join ArticlesEntities on articles.id=ArticlesEntities.article_id
+                                        where ArticlesEntities.entity_id=%d
+                                        """
+                                        % self.data["id"])
+        for related_story in related_stories:
+            datadict=dict( zip( ("id","source","headline","body"),related_story))
+            story_badge=StoryBadge(name=datadict["source"]+datadict["headline"],
+                                   headline=datadict["headline"],
+                                   data=datadict,
+                                   db=self.db)
+            self.add_child(story_badge)
+        return self.children
             
     def get_child_position(self,child):
         if (not child) or (len(self.children)==0):
@@ -227,17 +246,25 @@ class StoryBadge(UIBadge):
         dirty_rect=pygame.draw.rect(self.surface, 0, self.component_positions['shape'], self.border_width)
         return [dirty_rect]
 
-    def find_children(self,list_of_children=None):
-        if not list_of_children:
-            related_entities=rows_to_objects(self.db.execute("""select * from Entities
-                                            inner join StoryEntities on Entities.id=StoryEntities.entity_id
-                                            where StoryEntities.story_id=%d
-                                            """
-                                            % self.data["story"].id),Entities)
-        else:
-            for child in list_of_children:
-                child.set_parent(self)
-
+    def find_children(self):
+        #get rid of current children, find new child info, create badges for them
+        #getrelated records from DB, create children
+        self.kill_children() #kill my current children
+        related_entities=self.db.execute("""select distinct * from Entities
+                                        inner join ArticlesEntities on Entities.id=ArticlesEntities.entity_id
+                                        where ArticlesEntities.article_id=%d
+                                        """
+                                        % self.data["id"])
+        print "related entities in SB find children="
+        for related_entity in related_entities:
+            datadict=dict(zip(("id","fullname"),related_entity))
+            entity_badge=EntityBadge(name=datadict["fullname"],
+                                     data=datadict,
+                                     db=self.db)
+            self.add_child(entity_badge)
+        return self.children
+            
+            
     def get_child_position(self,child):
         if (not child) or (len(self.children)==0):
             raise Exception("No child to find, or I have no children.")

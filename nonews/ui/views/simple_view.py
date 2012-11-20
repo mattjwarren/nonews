@@ -46,6 +46,10 @@ class View(object):
         else:
             raise Exception("Attempt to add a node that has already been added.")
         
+    def add_nodes(self,nodes):
+        for node in nodes:
+            self.add_node(node)
+            
     def remove_node(self,node):
         if node in self.nodes:
             if node!=self.focus:
@@ -84,7 +88,7 @@ class View(object):
         
     def _focus_do(self):
         print 'doing _focus_do'
-        self.focus.find_children(list_of_children=self.nodes)
+        self.add_nodes(self.focus.find_children())
             
     def _erase_nodes(self):
         dirty_rects=[]
