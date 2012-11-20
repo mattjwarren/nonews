@@ -4,44 +4,50 @@ Created on 15 Nov 2012
 @author: GB108544
 '''
 
-from db_elements import Schema,Table,Record
-from db_elements import IntegerField, StringField, RelatedField
+from db.components.elements import Schema,Table, Record
+from db.components.fields import IntegerField, StringField, RelatedField
 
 
 class Article(Record):
     def __init__(self):
-        Record.__init__(self)
-        self.fields=[
-                IntegerField(name='id',
-                                readable_name='Content ID',
-                                size=11,
-                                auto_increment=True,
-                                default=None,
-                                not_null=True,
-                                primary_key=True,
-                                value=""),
-                StringField(name='headline',
+        self.id=IntegerField(name='id',
+                            readable_name='Content ID',
+                            size=11,
+                            auto_increment=True,
+                            default=0,
+                            not_null=True,
+                            primary_key=True,
+                            )
+
+        self.primary_key=(self.id,)
+
+        self.headline=StringField(name='headline',
                                  readable_name="Headline",
                                  size=255,
-                                 default=None,
-                                 not_null=True),
-                StringField(name="body",
-                                 readable_name="Contents",
-                                 size=8192,
-                                 default=None,
-                                 not_null=True,
-                                 unique=True),
-                ]
-        
-        self.unique=("body",)    
-        self.primary_key=("id",)
+                                 default="",
+                                 not_null=True)
+    
+        self.body=StringField(name="body",
+                             readable_name="Contents",
+                             size=8192,
+                             default="",
+                             not_null=True,
+                             unique=True)
+    
+        unique=(self.body,)
+
+        self.fields=[self.id,self.headline,self.body]    
+
+    def create_sql(self):
+        pass
+
+class Articles(Table):
+            
+    def __init__(self, record_class):
+        self.record_class=record_class
 
 
-class Articles(Table):     
-    def __init__(self,record_class):
-        Table.__init__(self,record_class)
-
-        
+                
 
 
 
