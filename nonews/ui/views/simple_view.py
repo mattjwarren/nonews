@@ -31,7 +31,7 @@ class View(object):
     def focus_node(self,node):
         if self.focus:
             self._focus_erase_rects+=self.focus.erase()
-            self._focus_erase_rects+=self.focus.kill_children()
+            self._focus_erase_rects+=self.focus.remove_children()
             self.focus.is_focus=False
             self.focus_pos=(self.focus.cx,self.focus.cy)
         self.focus=node
